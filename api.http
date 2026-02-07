@@ -1,0 +1,144 @@
+# ===============================================
+# API REST - Clase 3 (Express + CORS + Middlewares)
+# Pruebas con REST Client (extensión de VS Code)
+# ===============================================
+
+@baseUrl = http://localhost:3000
+@json = Content-Type: application/json
+
+### 1. Ruta raíz - Bienvenida (GET)
+GET {{baseUrl}}/
+
+### 2. Saludo JSON de prueba (GET)
+GET {{baseUrl}}/api/saludo
+
+### 9. Ruta inexistente (debe caer en middleware 404)
+GET {{baseUrl}}/api/esto-no-existe
+
+### 10. Probar CORS desde otro origen (simulado)
+# Abre un HTML con fetch en otro puerto (ej: Live Server 5500)
+# y copia aquí la petición si quieres probar manualmente
+GET {{baseUrl}}/api/saludo
+
+# ===============================================
+# Notas rápidas:
+# - Usa Ctrl + Alt + R (o clic en "Send Request") para ejecutar cada bloque
+# - Después de crear Pokémon con POST, refresca el GET /api/pokemon
+# - Si agregamos PUT/DELETE más adelante, añadimos bloques nuevos aquí
+# - Puedes copiar cualquier bloque y modificarlo para probar variaciones
+# ===============================================
+
+### Listar todas las películas (GET /api/movies)
+GET {{baseUrl}}/api/movies
+
+### Obtener una película específica (Inception)
+GET {{baseUrl}}/api/movies/1
+
+### Crear una nueva película (POST)
+POST {{baseUrl}}/api/movies
+{{json}}
+
+{
+  "titulo": "Dune: Parte Dos",
+  "año": 2024,
+  "director": "Denis Villeneuve",
+  "genero": "Ciencia ficción / Aventura"
+}
+
+### Probar error de validación (POST sin título)
+POST {{baseUrl}}/api/movies
+{{json}}
+
+{
+  "año": 2025,
+  "director": "Alguien"
+}
+
+### Película inexistente (debe dar 404)
+GET {{baseUrl}}/api/movies/999
+
+### POST válido - Crear película completa
+POST {{baseUrl}}/api/movies
+{{json}}
+
+{
+  "titulo": "Oppenheimer",
+  "director": "Christopher Nolan",
+  "año": 2023,
+  "genero": "Biografía / Drama"
+}
+
+### POST inválido - Sin título ni director
+POST {{baseUrl}}/api/movies
+{{json}}
+
+{
+  "año": 2025
+}
+
+### POST inválido - Título muy corto y año inválido
+POST {{baseUrl}}/api/movies
+{{json}}
+
+{
+  "titulo": "Ab",
+  "director": "Yo",
+  "año": 1800
+}
+
+### POST válido - Solo título y director (año y género opcionales)
+POST {{baseUrl}}/api/movies
+{{json}}
+
+{
+  "titulo": "El Padrino",
+  "director": "Francis Ford Coppola"
+}
+
+### PATCH - Actualizar solo el año de Inception (ID 1)
+PATCH {{baseUrl}}/api/movies/1
+{{json}}
+
+{
+  "año": 2011
+}
+
+### PATCH - Actualizar título y género de The Matrix (ID 2)
+PATCH {{baseUrl}}/api/movies/2
+{{json}}
+
+{
+  "titulo": "The Matrix Reloaded",
+  "genero": "Acción / Ciencia ficción / Thriller"
+}
+
+### PATCH - Actualizar solo género (deja otros campos intactos)
+### PATCH - Actualizar solo género de Interstellar (ID 3)
+PATCH {{baseUrl}}/api/movies/3
+{{json}}
+
+{
+  "genero": "Ciencia ficción / Aventura / Drama"
+}
+
+### PATCH inválido - Año incorrecto
+PATCH {{baseUrl}}/api/movies/1
+{{json}}
+
+{
+  "año": 1800
+}
+
+### PATCH sin campos (debe dar error)
+PATCH {{baseUrl}}/api/movies/1
+{{json}}
+
+{}
+
+### PATCH película inexistente
+PATCH {{baseUrl}}/api/movies/999
+{{json}}
+
+{
+  "titulo": "No existe"
+}

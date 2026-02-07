@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Lista de Películas</title>
+  <!-- Aquí solo estilos o meta, NO fetch -->
+  <style>
+    body { font-family: Arial; }
+    ul { list-style: none; }
+  </style>
+</head>
+<body>
+  <h1>Mis Películas</h1>
+  <button onclick="cargarPeliculas()">Cargar desde API</button>
+  <ul id="lista"></ul>
+
+  <!-- Script al final del body (lo más común y seguro) -->
+  <script>
+    async function cargarPeliculas() {
+      try {
+        const respuesta = await fetch('http://localhost:3000/api/movies');
+        if (!respuesta.ok) throw new Error('Error: ' + respuesta.status);
+        
+        const peliculas = await respuesta.json();
+
+        const lista = document.getElementById('lista');
+        lista.innerHTML = '';
+
+        peliculas.forEach(p => {
+          const li = document.createElement('li');
+          li.textContent = `${p.titulo} (${p.año}) - ${p.genero}`;
+          lista.appendChild(li);
+        });
+      } catch (error) {
+        console.error('Error al cargar:', error);
+        alert('No se pudieron cargar las películas');
+      }
+    }
+  </script>
+</body>
+</html>
