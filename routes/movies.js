@@ -1,6 +1,7 @@
-// routes/movies.js
-const express = require('express');
-const router = express.Router();
+// ./routes/movies.js
+import { Router } from 'express';
+
+const router = Router();
 
 // Películas de ejemplo (base de datos en memoria)
 let movies = [
@@ -9,41 +10,35 @@ let movies = [
   { id: 3, titulo: "Interstellar", año: 2014, director: "Christopher Nolan", genero: "Ciencia ficción / Drama" }
 ];
 
-// GET /movies → Lista todas las películas
+// GET / → Lista todas las películas
 router.get('/', (req, res) => {
   res.json(movies);
 });
 
-// GET /movies/:id → Obtiene una película por ID
+// GET /:id → Obtiene una película por ID
 router.get('/:id', (req, res) => {
   const id = parseInt(req.params.id);
   const movie = movies.find(m => m.id === id);
-
   if (!movie) {
     return res.status(404).json({ error: 'Película no encontrada' });
   }
-
   res.json(movie);
 });
 
-// POST /movies → Crea una nueva película con validaciones
+// POST / → Crea una nueva película con validaciones
 router.post('/', (req, res) => {
   const { titulo, director, año, genero } = req.body;
-
   const errores = [];
 
   if (!titulo || typeof titulo !== 'string' || titulo.trim().length < 3) {
     errores.push('El título es obligatorio y debe tener al menos 3 caracteres');
   }
-
   if (!director || typeof director !== 'string' || director.trim().length < 3) {
     errores.push('El director es obligatorio y debe tener al menos 3 caracteres');
   }
-
   if (año && (typeof año !== 'number' || año < 1888 || año > new Date().getFullYear() + 5)) {
     errores.push('El año debe ser un número válido (entre 1888 y el año actual +5)');
   }
-
   if (genero && typeof genero !== 'string') {
     errores.push('El género debe ser texto');
   }
@@ -65,11 +60,10 @@ router.post('/', (req, res) => {
 
   movies.push(nuevaPelicula);
   console.log('Nueva película creada:', nuevaPelicula);
-
   res.status(201).json(nuevaPelicula);
 });
 
-// PATCH /movies/:id → Actualiza película parcialmente
+// PATCH /:id → Actualiza película parcialmente
 router.patch('/:id', (req, res) => {
   const id = parseInt(req.params.id);
   const movieIndex = movies.findIndex(m => m.id === id);
@@ -78,9 +72,7 @@ router.patch('/:id', (req, res) => {
     return res.status(404).json({ error: 'Película no encontrada' });
   }
 
-  const movie = movies[movieIndex];  // ← esta línea es importante
-
-  // Protección contra req.body undefined o no objeto
+  const movie = movies[movieIndex];
   const body = req.body || {};
   const { titulo, director, año, genero } = body;
 
@@ -130,8 +122,8 @@ router.patch('/:id', (req, res) => {
   }
 
   console.log(`Película actualizada (PATCH): ID ${id}`, movie);
-
-  res.json(movie);  // Devolvemos la película actualizada
+  res.json(movie);
 });
 
-module.exports = router;
+// Exportamos el router como default (necesario para tu import en index.js)
+export default router;

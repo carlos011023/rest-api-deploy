@@ -1,60 +1,87 @@
-// index.js - Servidor base para Clase 3 (Express + preparación para CORS)
+// index.js
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';           // npm install helmet
+import moviesRouter from './routes/movies.js';  // ← ¡extensión .js obligatoria!
 
-const express = require('express');
-const cors = require('cors');          // lo instalamos para CORS
+// Cargar variables de entorno (instala dotenv si no lo tienes: npm install dotenv)
+import 'dotenv/config';
+
 const app = express();
 
-// Middleware global: permite CORS (lo activaremos en breve)
-app.use(cors());                       // por ahora permite todo (para pruebas)
+// ─── Seguridad básica ───
+app.use(helmet());
 
-// Middleware incorporado: procesa JSON en el body de POST/PUT
-app.use(express.json());
+// CORS controlado (usa .env en producción)
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',')
+  : ['http://localhost:3000', 'http://localhost:5173', 'http://127.0.0.1:5173'];
 
-// Middleware de logging (muy útil para ver qué llega)
+app.use(cors({
+  origin: (origin, callback) => {
+    // Permitir requests sin origin (Postman, curl, etc.)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Origen no permitido por política CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
+// Limitar tamaño de JSON (evita ataques de bombas grandes)
+app.use(express.json({ limit: '300kb' }));
+app.use(express.urlencoded({ extended: true, limit: '300kb' }));
+
+// Logging mejorado
 app.use((req, res, next) => {
   const hora = new Date().toLocaleString('es-MX', { timeZone: 'America/Chicago' });
-  console.log(`[${hora}] ${req.method} ${req.url} - Origen: ${req.headers.origin || 'local'}`);
-  next(); // pasa al siguiente middleware
+  console.log(`[${hora}] ${req.method} ${req.url} ── ${req.headers.origin || 'sin-origin'}`);
+  next();
 });
 
-// Importa el router de películas
-const moviesRouter = require('./routes/movies');
-
-// Monta las rutas en /api/movies
+// Rutas principales
 app.use('/api/movies', moviesRouter);
 
-// Ruta de prueba básica (raíz)
+// Rutas de desarrollo (puedes condicionarlas después)
 app.get('/', (req, res) => {
   res.send(`
-    <h1>¡Clase 3 - Servidor Express listo! 🚀</h1>
-    <p>Estamos preparando CORS y middlewares avanzados.</p>
-    <p>Prueba: <a href="/api/saludo">/api/saludo</a></p>
+    <h1>¡Clase 3 - Servidor Express ESM listo! 🚀</h1>
+    <p>Estamos usando ESM + seguridad básica.</p>
   `);
 });
 
-// Ruta de ejemplo para probar JSON
 app.get('/api/saludo', (req, res) => {
   res.json({
-    mensaje: '¡Hola desde la Clase 3!',
-    fecha: new Date().toLocaleString(),
+    mensaje: '¡Hola desde la Clase 3 en ESM!',
+    fecha: new Date().toLocaleString('es-MX', { timeZone: 'America/Chicago' }),
     desde: 'San Antonio, Texas 😄'
   });
 });
 
-// Middleware 404 - al final de todas las rutas
+// 404
 app.use((req, res) => {
   res.status(404).json({ error: 'Ruta no encontrada 🙅‍♂️' });
 });
 
-// Middleware de errores - último de todos
+// Error handler mejorado
 app.use((err, req, res, next) => {
-  console.error('Error capturado:', err.message);
-  res.status(500).json({ error: 'Algo salió mal en el servidor 💥' });
+  console.error('ERROR:', err.stack || err.message);
+  
+  const status = err.status || 500;
+  const message = status === 500 
+    ? 'Error interno del servidor 💥' 
+    : (err.message || 'Error desconocido');
+
+  res.status(status).json({ error: message });
 });
 
-// Puerto dinámico (funciona local y en producción)
 const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => {
-  console.log(`Servidor de Clase 3 corriendo en http://localhost:${PORT}`);
-  console.log('Ctrl + C para detener');
+  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+  console.log(`Entorno: ${process.env.NODE_ENV || 'development'}`);
 });
