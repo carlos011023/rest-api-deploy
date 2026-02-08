@@ -56,12 +56,12 @@ app.use((req, res, next) => {
 app.use('/api/movies', moviesRouter);
 
 // Rutas de desarrollo (puedes condicionarlas después)
-app.get('/', (req, res) => {
+/*app.get('/', (req, res) => {
   res.send(`
     <h1>¡Clase 3 - Servidor Express ESM listo! 🚀</h1>
     <p>Estamos usando ESM + seguridad básica.</p>
   `);
-});
+});*/
 
 app.get('/', (req, res) => {
   res.send(`
