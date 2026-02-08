@@ -98,6 +98,14 @@ app.get('/', (req, res) => {
   `);
 });
 
+app.get('/api/saludo', (req, res) => {
+  res.json({
+    mensaje: '¡Hola desde la Clase 3 en producción!',
+    fecha: new Date().toLocaleString('es-MX', { timeZone: 'America/Chicago' }),
+    desde: 'San Antonio, Texas 😄'
+  });
+});
+
 // Error handler mejorado
 app.use((err, req, res, next) => {
   console.error('ERROR:', err.stack || err.message);
