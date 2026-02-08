@@ -10,7 +10,16 @@ import 'dotenv/config';
 const app = express();
 
 // ─── Seguridad básica ───
-app.use(helmet());
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],   // permite los <style> inline
+      imgSrc: ["'self'", 'data:'],               // por si agregas imágenes después
+      connectSrc: ["'self'"],                    // para futuras peticiones fetch
+    },
+  })
+);
 
 // CORS controlado (usa .env en producción)
 const allowedOrigins = process.env.ALLOWED_ORIGINS
@@ -54,17 +63,39 @@ app.get('/', (req, res) => {
   `);
 });
 
-app.get('/api/saludo', (req, res) => {
-  res.json({
-    mensaje: '¡Hola desde la Clase 3 en ESM!',
-    fecha: new Date().toLocaleString('es-MX', { timeZone: 'America/Chicago' }),
-    desde: 'San Antonio, Texas 😄'
-  });
-});
-
-// 404
-app.use((req, res) => {
-  res.status(404).json({ error: 'Ruta no encontrada 🙅‍♂️' });
+app.get('/', (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>API Películas - Clase 3</title>
+      <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #f0f4f8; color: #333; }
+        h1 { color: #2c3e50; }
+        .btn { 
+          display: inline-block; margin: 20px; padding: 12px 24px; 
+          background: #3498db; color: white; text-decoration: none; 
+          border-radius: 6px; font-size: 1.1em; transition: 0.3s; 
+        }
+        .btn:hover { background: #2980b9; transform: translateY(-2px); }
+      </style>
+    </head>
+    <body>
+      <h1>¡API de Películas Clase 3 corriendo! 🚀</h1>
+      <p>Estamos usando ESM, Helmet y CORS controlado.</p>
+      
+      <a href="/api/saludo" class="btn">Probar GET /api/saludo (JSON)</a>
+      <br>
+      <a href="/api/movies" class="btn">Ver lista de películas (GET /api/movies)</a>
+      
+      <p style="margin-top: 40px; font-size: 0.9em; color: #777;">
+        Usa Postman o curl para POST/PATCH. ¡Todo listo para Railway!
+      </p>
+    </body>
+    </html>
+  `);
 });
 
 // Error handler mejorado
